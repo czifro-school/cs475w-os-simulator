@@ -110,25 +110,28 @@ namespace OSSimulator
             return p;
         }
 
-        private void PrepareProcess()
+        public void PrepareProcess()
         {
-            if (_readyProcesses.Count > 5)
-                return;
-
-            var createdProcess = _processPool.GetRandomProcess();
-
-            createdProcess.ProcessState = ProcessState.READY_TO_RUN_SWAPPED;
-
-            if (_readyProcesses.Count == 0)
+            for (_readyProcess.Count < 500)
             {
-                _readyProcesses.Add(createdProcess);
-                return;
-            }
-
-            foreach (var readyProcess in _readyProcesses.Where(readyProcess => readyProcess.ArrivalTime > createdProcess.ArrivalTime))
-            {
-                _readyProcesses.Insert(_readyProcesses.FindIndex(x => x.PID == readyProcess.PID), createdProcess);
-                break;
+                if (_readyProcesses.Count > 5)
+                    return;
+    
+                var createdProcess = _processPool.GetRandomProcess();
+    
+                createdProcess.ProcessState = ProcessState.READY_TO_RUN_SWAPPED;
+    
+                if (_readyProcesses.Count == 0)
+                {
+                    _readyProcesses.Add(createdProcess);
+                    return;
+                }
+    
+                foreach (var readyProcess in _readyProcesses.Where(readyProcess => readyProcess.ArrivalTime > createdProcess.ArrivalTime))
+                {
+                    _readyProcesses.Insert(_readyProcesses.FindIndex(x => x.PID == readyProcess.PID), createdProcess);
+                    break;
+                }
             }
         }
     }
