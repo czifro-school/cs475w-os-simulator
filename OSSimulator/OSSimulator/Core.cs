@@ -35,19 +35,23 @@ namespace OSSimulator
 
         /// <summary>
         /// Puts process in running state, discrete event
+        /// Stops looking at 500 processes
         /// </summary>
         public void ExecuteProcess()
         {
-            if (_processes.Count == 0)
-                return;
-            ProcessInUse = _processes[0];
-            ProcessInUse.ProcessState = ProcessState.USER_RUNNING;
-            var processTaskTime = ProcessInUse.Tasks[ProcessInUse.TaskIndex].Time;
-            CurrentTimeQuantum = (MaxTimeQuantum < processTaskTime ? MaxTimeQuantum : processTaskTime);
-            ProcessInUse.Tasks[ProcessInUse.TaskIndex].Time -= CurrentTimeQuantum;
-            CanCS = true;
-            CanExecute = false;
-            _processes.RemoveAt(0);
+            while (_processes.Count < 500) 
+            {
+                if (_processes.Count == 0)
+                    return;
+                ProcessInUse = _processes[0];
+                ProcessInUse.ProcessState = ProcessState.USER_RUNNING;
+                var processTaskTime = ProcessInUse.Tasks[ProcessInUse.TaskIndex].Time;
+                CurrentTimeQuantum = (MaxTimeQuantum < processTaskTime ? MaxTimeQuantum : processTaskTime);
+                ProcessInUse.Tasks[ProcessInUse.TaskIndex].Time -= CurrentTimeQuantum;
+                CanCS = true;
+                CanExecute = false;
+                _processes.RemoveAt(0);
+            }
         }
 
         /// <summary>
