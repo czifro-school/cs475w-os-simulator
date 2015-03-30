@@ -51,6 +51,7 @@ namespace OSSimulator
                 CanCS = true;
                 CanExecute = false;
                 _processes.RemoveAt(0);
+                
             }
         }
 
@@ -165,6 +166,17 @@ namespace OSSimulator
             var f = _finishedProcesses[0];
             _finishedProcesses.RemoveAt(0);
             return f;
+        }
+        
+        public Process AddWaitTime(int wait_time)
+        {
+            foreach (var process in _processes)
+            {
+                process.wait_time += wait_time;
+                ///Need to finish this
+            }
+            
+            
         }
     }
 }
