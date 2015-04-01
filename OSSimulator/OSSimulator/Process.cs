@@ -15,5 +15,8 @@ namespace OSSimulator
         public int Priority { get; set; }
         public ProcessState ProcessState { get; set; }
         public int Age { get; set; }
+        public double TurnaroundTime { get; set; }
+        public double ResponseTime { get; set; }
+        public double WaitTime { get; set; }
     }
 }
