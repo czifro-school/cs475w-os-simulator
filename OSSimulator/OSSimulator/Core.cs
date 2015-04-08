@@ -154,7 +154,7 @@ namespace OSSimulator
         public List<Process> GetZombieProcesses()
         {
             if (_zombieProcesses.Count == 0)
-                return null;
+                return new List<Process>();
 
             var z = _zombieProcesses;
             _zombieProcesses.Clear();
@@ -164,7 +164,7 @@ namespace OSSimulator
         public List<Process> GetFinishedProcess()
         {
             if (_finishedProcesses.Count == 0)
-                return null;
+                return new List<Process>();
 
             var f = _finishedProcesses;
             _finishedProcesses.Clear();

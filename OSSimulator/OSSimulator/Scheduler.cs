@@ -17,6 +17,7 @@ namespace OSSimulator
         public Scheduler(ProcessPool processPool)
         {
             _processPool = processPool;
+            PrepareProcesses();
         }
 
         /// <summary>
@@ -24,7 +25,6 @@ namespace OSSimulator
         /// </summary>
         public void Run()
         {
-            PrepareProcesses();
             while (true)
             {
                 // f = a process that has finished its burst, z = a process that is now in zombie state
@@ -39,6 +39,8 @@ namespace OSSimulator
                 f = _core.GetFinishedProcess();
                 z = _core.GetZombieProcesses();
 
+                Console.WriteLine("{0} processes are now in Zombie state", z.Count);
+                Console.WriteLine("{0} processes finished CPU bursts", f.Count);
                 foreach (var process in z)
                 {
                     _processPool.ReturnProcess(process.PID);
@@ -52,6 +54,8 @@ namespace OSSimulator
                 f = _ioDevice.GetFinishedProcess();
                 z = _ioDevice.GetZombieProcesses();
 
+                Console.WriteLine("{0} processes are now in Zombie state", z.Count);
+                Console.WriteLine("{0} processes finished IO bursts", f.Count);
                 foreach (var process in z)
                 {
                     _processPool.ReturnProcess(process.PID);
@@ -81,10 +85,11 @@ namespace OSSimulator
 
         private void PrepareProcesses()
         {
-            while (_readyProcesses.Count < 500)
+            Console.WriteLine("Loading random processes into memory...");
+            while (_readyProcesses.Count < 50)
             {
-                if (_readyProcesses.Count > 5)
-                    return;
+                //if (_readyProcesses.Count > 5)
+                //    return;
 
                 var createdProcess = _processPool.GetRandomProcess();
 
