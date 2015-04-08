@@ -29,41 +29,61 @@ namespace OSSimulator
             {
                 // f = a process that has finished its burst, z = a process that is now in zombie state
                 List<Process> f = null, z = null;
-                _core.ExecuteProcess();
-                _masterClock += _core.CurrentTimeQuantum;
                 GetNextProcesses();
-                _core.ContextSwitch();
-                _masterClock += _core.CSTime;
-                GetNextProcesses();
-
-                f = _core.GetFinishedProcess();
-                z = _core.GetZombieProcesses();
-
-                Console.WriteLine("{0} processes are now in Zombie state", z.Count);
-                Console.WriteLine("{0} processes finished CPU bursts", f.Count);
-                foreach (var process in z)
+                if (_core.ProcessCount == 0)
                 {
-                    _processPool.ReturnProcess(process.PID);
+                    _masterClock += _core.MaxTimeQuantum;
                 }
-
-                foreach (var process in f)
+                else
                 {
-                    _ioDevice.AddProcess(process);
+
+
+                    _core.ExecuteProcess();
+                    _masterClock += _core.CurrentTimeQuantum;
+                    GetNextProcesses();
+                    _core.ContextSwitch();
+                    _masterClock += _core.CSTime;
+                    GetNextProcesses();
+
+                    f = _core.GetFinishedProcess();
+                    z = _core.GetZombieProcesses();
+
+                    Console.WriteLine("{0} processes are now in Zombie state", z.Count);
+                    Console.WriteLine("{0} processes finished CPU bursts", f.Count);
+                    foreach (var process in z)
+                    {
+                        _processPool.ReturnProcess(process);
+                    }
+
+                    foreach (var process in f)
+                    {
+                        _ioDevice.AddProcess(process);
+                    }
                 }
-
-                f = _ioDevice.GetFinishedProcess();
-                z = _ioDevice.GetZombieProcesses();
-
-                Console.WriteLine("{0} processes are now in Zombie state", z.Count);
-                Console.WriteLine("{0} processes finished IO bursts", f.Count);
-                foreach (var process in z)
+                if (_ioDevice.ProcessCount == 0)
                 {
-                    _processPool.ReturnProcess(process.PID);
+                    _masterClock += _core.MaxTimeQuantum;
                 }
-
-                foreach (var process in f)
+                else
                 {
-                    _ioDevice.AddProcess(process);
+                    _ioDevice.ExecuteProcess();
+                    _masterClock += _ioDevice.CurrentTimeQuantum;
+                    _ioDevice.ContextSwitch();
+                    _masterClock += _ioDevice.CSTime;
+                    f = _ioDevice.GetFinishedProcess();
+                    z = _ioDevice.GetZombieProcesses();
+
+                    Console.WriteLine("{0} processes are now in Zombie state", z.Count);
+                    Console.WriteLine("{0} processes finished IO bursts", f.Count);
+                    foreach (var process in z)
+                    {
+                        _processPool.ReturnProcess(process);
+                    }
+
+                    foreach (var process in f)
+                    {
+                        _ioDevice.AddProcess(process);
+                    }
                 }
             }
         }
