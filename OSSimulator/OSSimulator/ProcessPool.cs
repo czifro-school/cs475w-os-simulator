@@ -9,10 +9,12 @@ namespace OSSimulator
     public class ProcessPool
     {
         private readonly List<RawProcess> _rawProcesses;
+        public List<Process> FinishedProcesses { get; set; }
 
         public ProcessPool(List<RawProcess> rawProcesses)
         {
             _rawProcesses = rawProcesses;
+            FinishedProcesses = new List<Process>();
         }
 
         public Process GetRandomProcess()
@@ -45,30 +47,12 @@ namespace OSSimulator
                 Age = 0
             };
 
-            //var process = new Process();
-            //process.PID = Convert.ToInt32(processDetails[0]);
-            //process.Priority = rand.Next(10);
-            //process.TaskIndex = 0;
-            //process.Tasks = new List<Task>();
-            //for (var i = 2; i < 11; ++i)
-            //{
-            //    process.Tasks.Add(new Task { Type = (processDetails[i].Split(':').First() == "CPU"), Time = Convert.ToInt32(processDetails[i].Split(':').Last()) });
-            //}
-            //process.ProcessState = ProcessState.CREATED;
-            //process.Age = 0;
-
             return process;
         }
 
-        public void ReturnProcess(int PID)
+        public void ReturnProcess(Process p)
         {
-            var proc = _rawProcesses.SingleOrDefault(x => Convert.ToInt32(x.ProcessCSV.Split(',').First()) == PID);
-            if (proc == null)
-                return;
-
-            var index = _rawProcesses.FindIndex(x => x.ProcessCSV.Equals(proc.ProcessCSV));
-
-            _rawProcesses.ElementAt(index).IsBusy = false;
+            FinishedProcesses.Add(p);
         }
     }
 }

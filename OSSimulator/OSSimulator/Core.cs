@@ -11,7 +11,7 @@ namespace OSSimulator
         private readonly List<Process> _processes = new List<Process>();
         private readonly List<Process> _zombieProcesses = new List<Process>();
         private readonly List<Process> _finishedProcesses = new List<Process>();
-        private const int MaxTimeQuantum = 20;
+        public int MaxTimeQuantum { get { return 20; } }
         private const int MaxContextSwitchTime = 2;
 
         public Core()
