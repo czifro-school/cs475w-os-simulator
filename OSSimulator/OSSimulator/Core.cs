@@ -39,7 +39,7 @@ namespace OSSimulator
         /// </summary>
         public void ExecuteProcess()
         {
-            while (_processes.Count < 500) 
+            while (_processes.Count < 500)
             {
                 if (_processes.Count == 0)
                     return;
@@ -51,7 +51,7 @@ namespace OSSimulator
                 CanCS = true;
                 CanExecute = false;
                 _processes.RemoveAt(0);
-                
+                AddWaitTime(CurrentTimeQuantum);
             }
         }
 
@@ -74,6 +74,7 @@ namespace OSSimulator
                 ProcessInUse = null;
                 AgeProcesses();
                 CSTime = MaxContextSwitchTime;
+                AddWaitTime(CSTime);
                 return;
             }
             else if (ProcessInUse.Tasks[ProcessInUse.TaskIndex].Time == 0)
@@ -96,6 +97,7 @@ namespace OSSimulator
                     ProcessInUse = null;
                     CSTime = MaxContextSwitchTime;
                 }
+                AddWaitTime(CSTime);
                 return;
             }
 
@@ -105,6 +107,7 @@ namespace OSSimulator
             AddProcess(ProcessInUse);
             ProcessInUse = null;
             CSTime = MaxContextSwitchTime;
+            AddWaitTime(CSTime);
         }
 
         /// <summary>
@@ -148,35 +151,37 @@ namespace OSSimulator
             }
         }
 
-        public Process GetZombieProcess()
+        public List<Process> GetZombieProcesses()
         {
             if (_zombieProcesses.Count == 0)
                 return null;
 
-            var z = _zombieProcesses.ElementAt(0);
-            _zombieProcesses.RemoveAt(0);
+            var z = _zombieProcesses;
+            _zombieProcesses.Clear();
             return z;
         }
 
-        public Process GetFinishedProcess()
+        public List<Process> GetFinishedProcess()
         {
             if (_finishedProcesses.Count == 0)
                 return null;
 
-            var f = _finishedProcesses[0];
-            _finishedProcesses.RemoveAt(0);
+            var f = _finishedProcesses;
+            _finishedProcesses.Clear();
             return f;
         }
-        
-        public Process AddWaitTime(int wait_time)
+
+        public void AddWaitTime(int wait_time)
         {
             foreach (var process in _processes)
             {
-                process.wait_time += wait_time;
-                ///Need to finish this
+                process.WaitTime += wait_time;
+                process.TurnaroundTime += wait_time;
+                if (!process.HasExecutedOnce)
+                    process.ResponseTime += wait_time;
             }
-            
-            
+
+
         }
     }
 }

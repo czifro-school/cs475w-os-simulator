@@ -10,7 +10,7 @@ namespace OSSimulator
     {
         public int PID { get; set; }
         public int ArrivalTime { get; set; }
-        public List<Task> Tasks { get; set; } 
+        public List<Task> Tasks { get; set; }
         public int TaskIndex { get; set; }
         public int Priority { get; set; }
         public ProcessState ProcessState { get; set; }
@@ -18,5 +18,6 @@ namespace OSSimulator
         public double TurnaroundTime { get; set; }
         public double ResponseTime { get; set; }
         public double WaitTime { get; set; }
+        public bool HasExecutedOnce { get; set; }
     }
 }
