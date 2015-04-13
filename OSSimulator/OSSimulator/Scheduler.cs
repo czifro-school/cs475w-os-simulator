@@ -12,7 +12,7 @@ namespace OSSimulator
         private readonly Core _core = new Core();
         private readonly IODevice _ioDevice = new IODevice();
         private readonly ProcessPool _processPool;
-        private int _masterClock = 0;
+        private long _masterClock = 0;
 
         public Scheduler(ProcessPool processPool)
         {
@@ -27,6 +27,10 @@ namespace OSSimulator
         {
             while (true)
             {
+                if (_masterClock >= 800)
+                {
+                    int i;
+                }
                 // f = a process that has finished its burst, z = a process that is now in zombie state
                 List<Process> f = null, z = null;
                 GetNextProcesses();
@@ -118,14 +122,28 @@ namespace OSSimulator
                 if (_readyProcesses.Count == 0)
                 {
                     _readyProcesses.Add(createdProcess);
-                    return;
+                    //return;
                 }
 
-                foreach (var readyProcess in _readyProcesses.Where(readyProcess => readyProcess.ArrivalTime > createdProcess.ArrivalTime))
+                //var readyProcess = _readyProcesses.SingleOrDefault(r => r.ArrivalTime > createdProcess.ArrivalTime);
+
+                Process readyProcess = null;
+                foreach (var r in _readyProcesses)
                 {
-                    _readyProcesses.Insert(_readyProcesses.FindIndex(x => x.PID == readyProcess.PID), createdProcess);
-                    break;
+                    if (r.ArrivalTime > createdProcess.ArrivalTime)
+                    {
+                        readyProcess = r;
+                        break;
+                    }
                 }
+
+                if (readyProcess != null)
+                    _readyProcesses.Insert(_readyProcesses.FindIndex(x => x.PID == readyProcess.PID), createdProcess);
+
+                else
+                    _readyProcesses.Add(createdProcess);
+
+                
             }
         }
     }
