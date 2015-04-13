@@ -43,7 +43,6 @@ namespace OSSimulator
                     new Task { Type = (processDetails[9].Split(':').First() == "CPU"), Time = Convert.ToInt32(processDetails[9].Split(':').Last()) },
                     new Task { Type = (processDetails[10].Split(':').First() == "CPU"), Time = Convert.ToInt32(processDetails[10].Split(':').Last()) },
                 },
-                ProcessState = ProcessState.CREATED,
                 Age = 0
             };
 

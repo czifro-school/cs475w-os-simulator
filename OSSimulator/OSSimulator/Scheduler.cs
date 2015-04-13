@@ -9,12 +9,15 @@ namespace OSSimulator
     public class Scheduler
     {
         private readonly List<Process> _readyProcesses = new List<Process>();
+        private readonly List<Process> _completedProcesses = new List<Process>(); 
+        private readonly List<Core> _cores = new List<Core>();
         private readonly Core _core = new Core();
         private readonly IODevice _ioDevice = new IODevice();
         private readonly ProcessPool _processPool;
+        private readonly int _numProcesses = 50;
         private long _masterClock = 0;
 
-        public Scheduler(ProcessPool processPool)
+        public Scheduler(ProcessPool processPool, int numCores = 1)
         {
             _processPool = processPool;
             PrepareProcesses();
@@ -25,70 +28,156 @@ namespace OSSimulator
         /// </summary>
         public void Run()
         {
+            _masterClock = _readyProcesses[0].ArrivalTime;
             while (true)
             {
-                if (_masterClock >= 800)
-                {
-                    int i;
-                }
-                // f = a process that has finished its burst, z = a process that is now in zombie state
-                List<Process> f = null, z = null;
                 GetNextProcesses();
-                if (_core.ProcessCount == 0)
+                var fcfsProccess = _core.FCFS();
+                var rrLong = _core.RRLong();
+                var rrShort = _core.RRShort();
+
+                if (fcfsProccess.Tasks[fcfsProccess.TaskIndex++].Type)
                 {
-                    _masterClock += _core.MaxTimeQuantum;
+                    _core.FCFSProcesses.Insert(0, fcfsProccess);
                 }
                 else
                 {
-
-
-                    _core.ExecuteProcess();
-                    _masterClock += _core.CurrentTimeQuantum;
-                    GetNextProcesses();
-                    _core.ContextSwitch();
-                    _masterClock += _core.CSTime;
-                    GetNextProcesses();
-
-                    f = _core.GetFinishedProcess();
-                    z = _core.GetZombieProcesses();
-
-                    Console.WriteLine("{0} processes are now in Zombie state", z.Count);
-                    Console.WriteLine("{0} processes finished CPU bursts", f.Count);
-                    foreach (var process in z)
-                    {
-                        _processPool.ReturnProcess(process);
-                    }
-
-                    foreach (var process in f)
-                    {
-                        _ioDevice.AddProcess(process);
-                    }
+                    _ioDevice.FCFSProcesses.Add(fcfsProccess);
                 }
-                if (_ioDevice.ProcessCount == 0)
+
+                if (rrLong != null)
                 {
-                    _masterClock += _core.MaxTimeQuantum;
+                    if (rrLong.TaskIndex != rrLong.Tasks.Count || rrLong.Tasks[rrLong.TaskIndex].Time != 0)
+                    {
+                        _ioDevice.FCFSProcesses.Add(rrLong);
+                    }
                 }
-                else
+
+                if (rrShort != null)
                 {
-                    _ioDevice.ExecuteProcess();
-                    _masterClock += _ioDevice.CurrentTimeQuantum;
-                    _ioDevice.ContextSwitch();
-                    _masterClock += _ioDevice.CSTime;
-                    f = _ioDevice.GetFinishedProcess();
-                    z = _ioDevice.GetZombieProcesses();
-
-                    Console.WriteLine("{0} processes are now in Zombie state", z.Count);
-                    Console.WriteLine("{0} processes finished IO bursts", f.Count);
-                    foreach (var process in z)
+                    if (rrShort.TaskIndex != rrShort.Tasks.Count || rrShort.Tasks[rrShort.TaskIndex].Time != 0)
                     {
-                        _processPool.ReturnProcess(process);
-                    }
-
-                    foreach (var process in f)
-                    {
-                        _ioDevice.AddProcess(process);
+                        _ioDevice.FCFSProcesses.Add(rrShort);
                     }
                 }
+            }
+        }
+
+        public void RunConfig1()
+        {
+            while (_completedProcesses.Count < _numProcesses)
+            {
+                GetNextProcesses();
+
+                foreach (var core in _cores)
+                {
+                    GetNextProcesses();
+                    var fcfsProcess = core.FCFS();
+
+                    if (fcfsProcess.TaskIndex == fcfsProcess.Tasks.Count &&
+                    fcfsProcess.Tasks[fcfsProcess.TaskIndex].Time == 0)
+                        _completedProcesses.Add(fcfsProcess);
+                    else if (fcfsProcess.Tasks[fcfsProcess.TaskIndex++].Type)
+                    {
+                        core.FCFSProcesses.Insert(0, fcfsProcess);
+                    }
+                    else
+                    {
+                        _ioDevice.FCFSProcesses.Add(fcfsProcess);
+                    }
+
+                    fcfsProcess = _ioDevice.FCFS();
+                    if (fcfsProcess != null)
+                    {
+                        if (fcfsProcess.TaskIndex == fcfsProcess.Tasks.Count &&
+                    fcfsProcess.Tasks[fcfsProcess.TaskIndex].Time == 0)
+                            _completedProcesses.Add(fcfsProcess);
+                        else if (!fcfsProcess.Tasks[fcfsProcess.TaskIndex++].Type)
+                        {
+                            _ioDevice.FCFSProcesses.Insert(0, fcfsProcess);
+                        }
+                        else
+                        {
+                            core.FCFSProcesses.Add(fcfsProcess);
+                        }
+                    }
+                }
+            }
+        }
+
+        public void RunConfig2()
+        {
+            while (_completedProcesses.Count < _numProcesses)
+            {
+                GetNextProcesses();
+
+                foreach (var core in _cores)
+                {
+                    var rrLong = core.RRLong();
+
+                    if (rrLong != null)
+                    {
+                        if (rrLong.TaskIndex != rrLong.Tasks.Count || rrLong.Tasks[rrLong.TaskIndex].Time != 0)
+                        {
+                            _ioDevice.FCFSProcesses.Add(rrLong);
+                        }
+                    }
+
+                    rrLong = _ioDevice.FCFS();
+                    if (rrLong != null)
+                    {
+                        if (rrLong.TaskIndex == rrLong.Tasks.Count &&
+                        rrLong.Tasks[rrLong.TaskIndex].Time == 0)
+                            _completedProcesses.Add(rrLong);
+                        else if (!rrLong.Tasks[rrLong.TaskIndex++].Type)
+                        {
+                            _ioDevice.FCFSProcesses.Insert(0, rrLong);
+                        }
+                        else
+                        {
+                            core.FCFSProcesses.Add(rrLong);
+                        }
+                    }
+                }
+            }
+        }
+
+        public void RunConfig3()
+        {
+            while (_completedProcesses.Count < _numProcesses)
+            {
+                GetNextProcesses();
+
+                foreach (var core in _cores)
+                {
+                    var rrShort = core.RRShort();
+
+                    if (rrShort != null)
+                    {
+                        if (rrShort.TaskIndex != rrShort.Tasks.Count || rrShort.Tasks[rrShort.TaskIndex].Time != 0)
+                        {
+                            _ioDevice.FCFSProcesses.Add(rrShort);
+                        }
+                    }
+                    _masterClock += core.EventTime;
+                    GetNextProcesses();
+
+                    rrShort = _ioDevice.FCFS();
+                    if (rrShort != null)
+                    {
+                        if (rrShort.TaskIndex == rrShort.Tasks.Count &&
+                        rrShort.Tasks[rrShort.TaskIndex].Time == 0)
+                            _completedProcesses.Add(rrShort);
+                        else if (!rrShort.Tasks[rrShort.TaskIndex++].Type)
+                        {
+                            _ioDevice.FCFSProcesses.Insert(0, rrShort);
+                        }
+                        else
+                        {
+                            core.FCFSProcesses.Add(rrShort);
+                        }
+                    }
+                } 
             }
         }
 
@@ -97,27 +186,34 @@ namespace OSSimulator
             if (_readyProcesses.Count == 0)
                 return;
 
-            var processes = _readyProcesses.Where(x => x.ArrivalTime < _masterClock).ToList();
-            foreach (var p in processes)
+            var arrivedProcesses =
+                _readyProcesses.Where(x => x.ArrivalTime <= _masterClock).OrderBy(p => p.ArrivalTime).ToList();
+
+            foreach (var core in _cores)
             {
-                _readyProcesses.Remove(p);
-                _core.AddProcess(p);
+                switch (core.Config)
+                {
+                    case 1:
 
+                        break;
+                    case 2:
+
+                        break;
+
+                    case 3:
+
+                        break;
+                }
             }
-
         }
 
         private void PrepareProcesses()
         {
             Console.WriteLine("Loading random processes into memory...");
-            while (_readyProcesses.Count < 50)
+            while (_readyProcesses.Count < _numProcesses)
             {
-                //if (_readyProcesses.Count > 5)
-                //    return;
 
                 var createdProcess = _processPool.GetRandomProcess();
-
-                createdProcess.ProcessState = ProcessState.READY_TO_RUN_SWAPPED;
 
                 if (_readyProcesses.Count == 0)
                 {

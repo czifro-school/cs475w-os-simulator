@@ -47,7 +47,6 @@
     <Compile Include="IO\FileReader.cs" />
     <Compile Include="Process.cs" />
     <Compile Include="ProcessPool.cs" />
-    <Compile Include="ProcessState.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="RawProcess.cs" />
