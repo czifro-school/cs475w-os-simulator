@@ -8,7 +8,8 @@ namespace OSSimulator
 {
     public class IODevice
     {
-        public List<Process> FCFSProcesses { get; set; }
+        public List<Process> FCFSProcesses { get; private set; }
+        public int EventTime { get; private set; }
 
 
         public IODevice()
@@ -27,14 +28,16 @@ namespace OSSimulator
 
             var currentTimeLapse = firstProcess.Tasks[firstProcess.TaskIndex].Time;
             firstProcess.Tasks[firstProcess.TaskIndex].Time = 0;
+            firstProcess.HasExecutedOnce = true;
 
             foreach (var p in FCFSProcesses)
             {
+                if (!firstProcess.HasExecutedOnce)
+                    p.ResponseTime += (currentTimeLapse + 2);
                 p.WaitTime += (currentTimeLapse + 2);
-                p.ResponseTime += (currentTimeLapse + 2);
                 p.TurnaroundTime += (currentTimeLapse + 2);
             }
-
+            EventTime = (currentTimeLapse + 2);
             return firstProcess;
         }
     }

@@ -11,6 +11,17 @@ namespace OSSimulator.IO
     {
         private readonly string _path = "";
         private const string Filename = "processes.csv";
+        private const string FCFSSingle = "FCFSSingle.csv";
+        private const string FCFSDual = "FCFSDual.csv";
+        private const string FCFSQuad = "FCFSQuad.csv";
+        private const string FCFSOcto = "FCFSOcto.csv";
+        private const string FCFS16 = "FCFS16.csv";
+        private const string RRLongSingle = "RRLongSingle.csv";
+        private const string RRLongDual = "RRLongDual.csv";
+        private const string RRLongQuad = "RRLongQuad.csv";
+        private const string RRLongOcto = "RRLongOcto.csv";
+        private const string RRLong16 = "RRLong16.csv";
+
 
         public FileGenerator()
         {
@@ -30,7 +41,7 @@ namespace OSSimulator.IO
 
             for (var i = 0; i < numProcesses; ++i)
             {
-                processes[i] = (i+1).ToString() + "," + (rand.Next(maxBurstTime) + maxBurstTime).ToString() + ",";
+                processes[i] = (i+1).ToString() + "," + (rand.Next(300) + 30) + ",";
                 processes[i] += CPU + (rand.Next(maxBurstTime) + maxBurstTime) + ",";
 
                 // Generate random amounts of either IO or CPU bursts
@@ -44,6 +55,36 @@ namespace OSSimulator.IO
                 processes[i] += (rand.Next(2) == 0 ? CPU : IO) + (rand.Next(maxBurstTime) + maxBurstTime);
             }
             System.IO.File.WriteAllLines(_path, processes);
+        }
+
+        public void AddToFCFSSingle(string results)
+        {
+            string[] lines;
+
+            if (new FileInfo("..\\..\\" + FCFSSingle).Length == 0)
+            {
+                lines = new[] {"datetime,avg response,avg wait,avg turnaround", results};
+                File.WriteAllLines("..\\..\\" + FCFSSingle, lines);
+                return;
+            }
+
+            lines = new[] { results };
+            File.WriteAllLines("..\\..\\" + FCFSSingle, lines);
+        }
+
+        public void AddToFCFSDual(string results)
+        {
+            string[] lines;
+
+            if (new FileInfo("..\\..\\" + FCFSSingle).Length == 0)
+            {
+                lines = new[] { "datetime,avg response,avg wait,avg turnaround", results };
+                File.WriteAllLines("..\\..\\" + FCFSSingle, lines);
+                return;
+            }
+
+            lines = new[] { results };
+            File.WriteAllLines("..\\..\\" + FCFSSingle, lines);
         }
     }
 }

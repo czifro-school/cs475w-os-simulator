@@ -10,15 +10,16 @@ namespace OSSimulator
     {
         public List<Process> FCFSProcesses { get; set; }
         public List<Process> RRShortProcesses { get; set; }
-        public List<Process> RRLongProesses { get; set; }
-        public int Config { get; set; }
-        public int EventTime { get; set; }
+        public List<Process> RRLongProcesses { get; set; }
+        public int Config { get; private set; }
+        public int EventTime { get; private set; }
 
-        public Core()
+        public Core(int config)
         {
             FCFSProcesses = new List<Process>();
             RRShortProcesses = new List<Process>();
-            RRLongProesses = new List<Process>();
+            RRLongProcesses = new List<Process>();
+            Config = config;
         }
 
         public Process FCFS()
@@ -28,13 +29,18 @@ namespace OSSimulator
 
             var currentTimeLapse = firstProcess.Tasks[firstProcess.TaskIndex].Time;
             firstProcess.Tasks[firstProcess.TaskIndex].Time = 0;
+            firstProcess.HasExecutedOnce = true;
 
             foreach (var p in FCFSProcesses)
             {
+                if (!p.HasExecutedOnce)
+                    p.ResponseTime += (currentTimeLapse + 2);
                 p.WaitTime += (currentTimeLapse + 2);
-                p.ResponseTime += (currentTimeLapse + 2);
                 p.TurnaroundTime += (currentTimeLapse + 2);
             }
+            firstProcess.TurnaroundTime += (currentTimeLapse + 2);
+            firstProcess.WaitTime += 2;
+
             EventTime = (currentTimeLapse + 2);
             return firstProcess;
         }
@@ -43,8 +49,8 @@ namespace OSSimulator
         {
             var maxLongTimeQuantum = 20;
 
-            var firstProcess = RRLongProesses[0];
-                RRLongProesses.RemoveAt(0);
+            var firstProcess = RRLongProcesses[0];
+                RRLongProcesses.RemoveAt(0);
             var currentTimeQuantum = (firstProcess.Tasks[firstProcess.TaskIndex].Time < maxLongTimeQuantum ? 
                 firstProcess.Tasks[firstProcess.TaskIndex].Time :
                 maxLongTimeQuantum);
@@ -52,24 +58,24 @@ namespace OSSimulator
 
             firstProcess.Tasks[firstProcess.TaskIndex].Time -= currentTimeQuantum;
 
-            foreach (var p in RRLongProesses)
+            foreach (var p in RRLongProcesses)
             {
-                if (p.ResponseTime == 0)
+                if (!p.HasExecutedOnce)
                     p.ResponseTime = (currentTimeQuantum + 2);
                 p.TurnaroundTime += (currentTimeQuantum + 2);
                 p.WaitTime += (currentTimeQuantum + 2);
             }
-            firstProcess.TurnaroundTime += currentTimeQuantum;
-            firstProcess.WaitTime += currentTimeQuantum;
+            firstProcess.TurnaroundTime += (currentTimeQuantum + 2);
+            firstProcess.WaitTime += 2;
 
-            if ((firstProcess.TaskIndex == firstProcess.Tasks.Count &&
+            if ((firstProcess.TaskIndex == (firstProcess.Tasks.Count - 1) &&
                 firstProcess.Tasks[firstProcess.TaskIndex].Time == 0) ||
                 (firstProcess.Tasks[firstProcess.TaskIndex].Time == 0 &&
                 !firstProcess.Tasks[firstProcess.TaskIndex++].Type))
             {
                 return firstProcess;
             }
-            RRLongProesses.Add(firstProcess);
+            RRLongProcesses.Add(firstProcess);
             return null;
         }
 
@@ -77,8 +83,8 @@ namespace OSSimulator
         {
             var maxLongTimeQuantum = 10;
 
-            var firstProcess = RRLongProesses[0];
-            RRLongProesses.RemoveAt(0);
+            var firstProcess = RRShortProcesses[0];
+            RRShortProcesses.RemoveAt(0);
             var currentTimeQuantum = (firstProcess.Tasks[firstProcess.TaskIndex].Time < maxLongTimeQuantum ?
                 firstProcess.Tasks[firstProcess.TaskIndex].Time :
                 maxLongTimeQuantum);
@@ -86,22 +92,24 @@ namespace OSSimulator
 
             firstProcess.Tasks[firstProcess.TaskIndex].Time -= currentTimeQuantum;
 
-            foreach (var p in RRLongProesses)
+            foreach (var p in RRShortProcesses)
             {
-                if (p.ResponseTime == 0)
+                if (!p.HasExecutedOnce)
                     p.ResponseTime = (currentTimeQuantum + 2);
                 p.TurnaroundTime += (currentTimeQuantum + 2);
                 p.WaitTime += (currentTimeQuantum + 2);
             }
-            firstProcess.TurnaroundTime += currentTimeQuantum;
-            firstProcess.WaitTime += currentTimeQuantum;
+            firstProcess.TurnaroundTime += (currentTimeQuantum + 2);
+            firstProcess.WaitTime += 2;
 
-            if (firstProcess.TaskIndex == firstProcess.Tasks.Count &&
-                firstProcess.Tasks[firstProcess.TaskIndex].Time == 0)
+            if ((firstProcess.TaskIndex == (firstProcess.Tasks.Count - 1) &&
+                firstProcess.Tasks[firstProcess.TaskIndex].Time == 0) ||
+                (firstProcess.Tasks[firstProcess.TaskIndex].Time == 0 &&
+                !firstProcess.Tasks[firstProcess.TaskIndex++].Type))
             {
                 return firstProcess;
             }
-            RRLongProesses.Add(firstProcess);
+            RRShortProcesses.Add(firstProcess);
             return null;
         }
     } 

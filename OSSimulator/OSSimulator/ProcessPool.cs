@@ -43,10 +43,45 @@ namespace OSSimulator
                     new Task { Type = (processDetails[9].Split(':').First() == "CPU"), Time = Convert.ToInt32(processDetails[9].Split(':').Last()) },
                     new Task { Type = (processDetails[10].Split(':').First() == "CPU"), Time = Convert.ToInt32(processDetails[10].Split(':').Last()) },
                 },
-                Age = 0
+                Age = 0,
+                HasExecutedOnce = false
             };
 
             return process;
+        }
+
+        public List<Process> TestRun()
+        {
+            var processes = new List<Process>();
+
+            for (var i = 0; i < 10; ++i)
+            {
+                var processDetails = _rawProcesses[i].ProcessCSV.Split(',');
+
+                var process = new Process
+                {
+                    PID = Convert.ToInt32(processDetails[0]),
+                    ArrivalTime = Convert.ToInt32(processDetails[1]),
+                    Priority = 0,
+                    TaskIndex = 0,
+                    Tasks = new List<Task>
+                    {
+                        new Task { Type = (processDetails[2].Split(':').First() == "CPU"), Time = Convert.ToInt32(processDetails[2].Split(':').Last()) },
+                        new Task { Type = (processDetails[3].Split(':').First() == "CPU"), Time = Convert.ToInt32(processDetails[3].Split(':').Last()) },
+                        new Task { Type = (processDetails[4].Split(':').First() == "CPU"), Time = Convert.ToInt32(processDetails[4].Split(':').Last()) },
+                        new Task { Type = (processDetails[5].Split(':').First() == "CPU"), Time = Convert.ToInt32(processDetails[5].Split(':').Last()) },
+                        new Task { Type = (processDetails[6].Split(':').First() == "CPU"), Time = Convert.ToInt32(processDetails[6].Split(':').Last()) },
+                        new Task { Type = (processDetails[7].Split(':').First() == "CPU"), Time = Convert.ToInt32(processDetails[7].Split(':').Last()) },
+                        new Task { Type = (processDetails[8].Split(':').First() == "CPU"), Time = Convert.ToInt32(processDetails[8].Split(':').Last()) },
+                        new Task { Type = (processDetails[9].Split(':').First() == "CPU"), Time = Convert.ToInt32(processDetails[9].Split(':').Last()) },
+                        new Task { Type = (processDetails[10].Split(':').First() == "CPU"), Time = Convert.ToInt32(processDetails[10].Split(':').Last()) },
+                    },
+                    Age = 0,
+                    HasExecutedOnce = false
+                };
+                processes.Add(process);
+            }
+            return processes;
         }
 
         public void ReturnProcess(Process p)
